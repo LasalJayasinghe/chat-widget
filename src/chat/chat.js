@@ -19,259 +19,308 @@ window.EasyHelp.init = function () {
 
   // Define all styles within shadow DOM - completely isolated
   const shadowStyles = `
-    <style>
-        :host {
-            all: initial;
-            display: flex !important;
-            flex-direction: column !important;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        .chat-bubble {
-            width: 64px;
-            height: 64px;
-            background-color: #1f2937;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: transform 0.2s ease;
-        }
-        
-        .chat-bubble:hover {
-            transform: scale(1.05);
-        }
-        
-        .chat-bubble svg {
-            width: 40px;
-            height: 40px;
-            color: white;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-        }
-        
-        .chat-popup {
-            position: absolute;
-            bottom: 80px;
-            right: 0;
-            width: 384px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border: 1px solid #e5e7eb;
-            display: flex;
-            flex-direction: column;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            font-size: 14px;
-            height: 70vh;
-            max-height: 70vh;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-        
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-            background-color: #1f2937;
-            color: white;
-            border-radius: 12px 12px 0 0;
-        }
-        
-        .chat-header h3 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
-        
-        .close-btn {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .close-btn:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .close-btn svg {
-            width: 24px;
-            height: 24px;
-            stroke: currentColor;
-            stroke-width: 2;
-        }
-        
-        .chat-messages {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            background: #f9fafb;
-        }
-        
-        .chat-input-container {
-            padding: 16px;
-            border-top: 1px solid #e5e7eb;
-            background: white;
-            border-radius: 0 0 12px 12px;
-        }
-        
-        .input-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        
-        .chat-input {
-            flex: 1;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 12px 16px;
-            outline: none;
-            font-size: 14px;
-            font-family: inherit;
-        }
-        
-        .chat-input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 1px #3b82f6;
-        }
-        
-        .send-btn {
-            background-color: #1f2937;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background-color 0.2s;
-        }
-        
-        .send-btn:hover {
-            background-color: #374151;
-        }
-        
-        .powered-by {
-            text-align: center;
-            font-size: 12px;
-            margin-top: 12px;
-            color: #6b7280;
-        }
-        
-        .powered-by a {
-            color: #3b82f6;
-            text-decoration: none;
-        }
-        
-        .message-row {
-            display: flex;
-            margin-bottom: 12px;
-        }
-        
-        .message-row.user {
-            justify-content: flex-end;
-        }
-          
-        .message-row.notice {
-            justify-content: center;
-        }
-        
-        .message-bubble {
-            max-width: 70%;
-            padding: 8px 16px;
-            border-radius: 12px;
-            line-height: 1.4;
-        }
-        
-        .message-bubble.user {
-            background-color: #1f2937;
-            color: white;
-        }
-        
-        .message-bubble.assistant {
-            background-color: #e5e7eb;
-            color: #1f2937;
-        }
-        
-        .message-bubble.notice {
-            background-color: transparent;
-            color: #6b7280;
-            font-style: italic;
-        }
+   <style>
+    :host {
+      all: initial;
+      display: flex !important;
+      flex-direction: column !important;
+    }
 
-        .eh-loader {
-          position: absolute;
-          inset: 0;
-          background: rgba(255,255,255,0.85);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          font-size: 14px;
-          z-index: 1000;
-        }
+    /* RESET */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .eh-loader.hidden {
-          display: none;
-        }
+    /* UTILITIES */
+    .hidden {
+      display: none !important;
+    }
 
-        .eh-spinner {
-          width: 32px;
-          height: 32px;
-          border: 3px solid #d3d3d3;
-          border-top-color: #3b82f6;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-          margin-bottom: 8px;
-        }
+    /* ------------------------- */
+    /* MODERN FLOATING BUBBLE    */
+    /* ------------------------- */
+    .chat-bubble {
+      width: 62px;
+      height: 62px;
+      background: #111827;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.28);
+      transition: all 0.25s ease;
+      transform: translateY(0px);
+    }
 
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
+    .chat-bubble:hover {
+      transform: translateY(-4px) scale(1.06);
+      background: #0f1624;
+    }
 
-        @media (max-width: 768px) {
-            .chat-popup {
-                position: fixed;
-                top: 0;
-                right: 0;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                max-height: 100%;
-                border-radius: 0;
-            }
-            
-            .chat-header {
-                border-radius: 0;
-            }
-            
-            .chat-input-container {
-                border-radius: 0;
-            }
-        }
+    .chat-bubble svg {
+      width: 34px;
+      height: 34px;
+      stroke: white;
+    }
+
+    /* ------------------------- */
+    /* MODERN POPUP (GLASS UI)   */
+    /* ------------------------- */
+    .chat-popup {
+      position: absolute;
+      bottom: 80px;
+      right: 0;
+      width: 400px;
+      height: 70vh;
+      max-height: 70vh;
+
+      background: rgba(255,255,255,0.86);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.25);
+      box-shadow: 0 25px 55px rgba(0,0,0,0.35);
+
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    /* ------------------------- */
+    /* HEADER                    */
+    /* ------------------------- */
+    .chat-header {
+      background: #111827;
+      padding: 18px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-header h3 {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+    }
+
+    .close-btn:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .close-btn svg {
+      stroke: white;
+      width: 22px;
+      height: 22px;
+    }
+
+    /* ------------------------- */
+    /* MESSAGES                  */
+    /* ------------------------- */
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: transparent;
+    }
+
+    .message-row {
+      display: flex;
+      margin-bottom: 14px;
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+    }
+
+    .message-row.assistant {
+      justify-content: flex-start;
+    }
+
+    .message-row.notice {
+      justify-content: center;
+    }
+
+    .message-bubble {
+      max-width: 75%;
+      padding: 10px 16px;
+      border-radius: 14px;
+      line-height: 1.45;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .message-bubble.user {
+      background: #111827;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-bubble.assistant {
+      background: #f3f4f6;
+      color: #111827;
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-bubble.notice {
+      background: transparent;
+      color: #6b7280;
+      font-style: italic;
+      box-shadow: none;
+    }
+
+    /* ------------------------- */
+    /* TYPING DOTS LOADER        */
+    /* ------------------------- */
+    .eh-loader {
+      display: flex;
+      justify-content: flex-end;
+      padding: 12px 16px;
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .typing-dots div {
+      width: 8px;
+      height: 8px;
+      background: #9ca3af;
+      border-radius: 50%;
+      animation: typing 1s infinite ease-in-out;
+    }
+
+    .typing-dots div:nth-child(2) { animation-delay: 0.1s; }
+    .typing-dots div:nth-child(3) { animation-delay: 0.2s; }
+
+    @keyframes typing {
+      0% { transform: translateY(0px); opacity: 0.4; }
+      50% { transform: translateY(-4px); opacity: 1; }
+      100% { transform: translateY(0px); opacity: 0.4; }
+    }
+
+    /* ------------------------- */
+    /* INPUT AREA                */
+    /* ------------------------- */
+    .chat-input-container {
+      padding: 16px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .chat-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .send-btn {
+      background: #111827;
+      padding: 12px 20px;
+      border-radius: 12px;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+
+    .send-btn:hover {
+      background: #1f2937;
+    }
+
+    .powered-by {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      .chat-popup {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        bottom: 0;
+        right: 0;
+      }
+    }
+
+
+    @keyframes swoopIn {
+    0% {
+      transform: translate(120px, 120px) scale(0.4);
+      opacity: 0;
+    }
+    70% {
+      transform: translate(-10px, -10px) scale(1.05);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+
+  @keyframes swoopOut {
+    0% {
+      transform: translate(0, 0) scale(1);
+      opacity: 1;
+    }
+    40% {
+      transform: translate(-10px, -10px) scale(1.05);
+    }
+    100% {
+      transform: translate(120px, 120px) scale(0.4);
+      opacity: 0;
+    }
+  }
+
+  .chat-bubble.swoop-in {
+    animation: swoopIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .chat-bubble.swoop-out {
+    animation: swoopOut 0.38s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+  }
+
+  .chat-popup.swoop-in {
+    animation: swoopIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .chat-popup.swoop-out {
+    animation: swoopOut 0.38s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+  }
+
     </style>
 `;
 
@@ -291,15 +340,16 @@ window.EasyHelp.init = function () {
           </svg>
         </button>
       </div>
-      <div id="eh-loader" class="eh-loader hidden">
-        <div class="eh-spinner"></div>
-        <p>Loading...</p>
-      </div>
       <div class="chat-messages" id="chat-messages">
         <div id="welcome-message" class="message-row assistant">
           <div class="message-bubble assistant">
             You are now connected to EduChat Assistant. How can we help you today?
           </div>
+        </div>
+      </div>
+      <div id="eh-loader" class="eh-loader hidden">
+        <div class="typing-dots">
+          <div></div><div></div><div></div>
         </div>
       </div>
       <div class="chat-input-container">
@@ -350,6 +400,7 @@ window.EasyHelp.init = function () {
       tokenId: params.get("tokenId"),
       mobile: params.get("mobile"),
       email: params.get("email"),
+      uid: params.get("uid"),
     };
   })();
 
@@ -362,19 +413,29 @@ window.EasyHelp.init = function () {
   let pollingHold = false;
   let chatOpened = false;
 
-  async function togglePopup() {
+  function togglePopup() {
     if (!chatOpened) {
-      const init = await ChatService.initSession(ChatConfig);
-      if (init.status !== "success") {
-        console.error("Session init failed:", init.error);
-        return;
-      }
-      await pollLoop();
+      ChatService.initSession(ChatConfig).then((init) => {
+        if (init.status === "success") pollLoop();
+      });
     }
 
     chatOpened = true;
-    chatPopup.classList.toggle("hidden");
-    if (!chatPopup.classList.contains("hidden")) chatInput.focus();
+
+    if (chatPopup.classList.contains("hidden")) {
+      chatPopup.classList.remove("hidden");
+      chatPopup.classList.remove("swoop-out");
+      chatPopup.classList.add("swoop-in");
+    } else {
+      chatPopup.classList.remove("swoop-in");
+      chatPopup.classList.add("swoop-out");
+
+      setTimeout(() => {
+        chatPopup.classList.add("hidden");
+      }, 350);
+    }
+
+    chatInput.focus();
   }
 
   function appendMessage(sender, text) {
@@ -383,6 +444,53 @@ window.EasyHelp.init = function () {
     row.innerHTML = `<div class="message-bubble ${sender}">${text}</div>`;
     chatMessages.appendChild(row);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function appendInteractiveMessage(messageObj) {
+    const row = document.createElement("div");
+    row.className = "message-row assistant";
+
+    let html = `
+        <div class="message-bubble assistant">
+            ${messageObj.title}
+            <div class="eh-interactive-container" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+    `;
+
+    messageObj.choices.forEach((choice) => {
+      html += `
+            <button 
+                class="eh-choice-btn" 
+                data-id="${choice.id}" 
+                data-label="${choice.label}"
+                data-next="${choice.next}"
+                style="
+                    padding: 10px 14px;
+                    background: #1f2937;
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    text-align: left;
+                "
+            >
+                ${choice.label}
+            </button>
+        `;
+    });
+
+    html += `</div></div>`;
+    row.innerHTML = html;
+
+    chatMessages.appendChild(row);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // attach click drivers
+    row.querySelectorAll(".eh-choice-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        handleChoiceClick(btn.dataset.id, btn.dataset.label);
+      });
+    });
   }
 
   // ------------------------------------------------------------------------------------------
@@ -402,6 +510,15 @@ window.EasyHelp.init = function () {
 
   chatBubble.onclick = togglePopup;
   closePopup.onclick = togglePopup;
+
+  async function handleChoiceClick(choiceId, choiceLabel) {
+    await ChatService.sendMessage(ChatConfig, {
+      list_reply: {
+        id: choiceId,
+        title: choiceLabel,
+      },
+    });
+  }
 
   // ------------------------------------------------------------------------------------------
   // Polling
@@ -423,11 +540,13 @@ window.EasyHelp.init = function () {
       if (res.messages.length === 0 && lastMessageId === 0) {
         welcomeEl.classList.remove("hidden");
       } else {
-        welcomeEl.classList.add("hidden"); 
+        welcomeEl.classList.add("hidden");
       }
 
       res.messages.forEach((m) => {
-        if (m.type == "RESPONSE" && !m.agent_id) {
+        if (m.type == "RESPONSE" && m.extra != null) {
+          appendInteractiveMessage(m.extra);
+        } else if (m.type == "RESPONSE" && !m.agent_id) {
           appendMessage("user", m.message);
         } else if (m.type == "RESPONSE" && m.agent_id) {
           appendMessage("assistant", m.message);
@@ -442,13 +561,14 @@ window.EasyHelp.init = function () {
     }
 
     isPolling = false;
-    setTimeout(pollLoop, 2000); 
+    setTimeout(pollLoop, 2000);
   }
 
   // ------------------------------------------------------------------------------------------
   // API Layer
   // ------------------------------------------------------------------------------------------
 
+  // const API_BASE = "http://localhost:8001/api/webhook/webChat";
   const API_BASE =
     "https://dev2.databoxtech.io/edumix_support/api/api/webhook/webChat";
 
@@ -487,6 +607,8 @@ window.EasyHelp.init = function () {
         const s = await this.initSession(config);
         if (s.status !== "success") return s;
       }
+
+      console.log(text);
 
       showLoader();
 
